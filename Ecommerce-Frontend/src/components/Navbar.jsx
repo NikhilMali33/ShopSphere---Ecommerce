@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../axios";
+import { Link } from "react-router-dom";
 
 const Navbar = ({ onSelectCategory }) => {
 
@@ -14,11 +15,10 @@ const Navbar = ({ onSelectCategory }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [noResults, setNoResults] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
-
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8082/api/categories")
+    API.get("/categories")
       .then(res => {
         console.log("Categories:", res.data);
         setCategories(res.data);
@@ -33,8 +33,8 @@ const Navbar = ({ onSelectCategory }) => {
       setShowSearchResults(true);
 
       try {
-        const response = await axios.get(
-          `http://localhost:8082/api/products/search?keyword=${value}`
+        const response = await API.get(
+          `/products/search?keyword=${value}`
         );
 
         setSearchResults(response.data);

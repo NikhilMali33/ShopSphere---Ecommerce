@@ -1,12 +1,11 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useContext, useEffect } from "react";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import AppContext from "../Context/Context";
-import axios from "../axios";
-import UpdateProduct from "./UpdateProduct";
+import API from "../axios";
+
 const Product = () => {
   const { id } = useParams();
-  const { data, addToCart, removeFromCart, cart, refreshData } =
+  const { addToCart, removeFromCart, refreshData } =
     useContext(AppContext);
   const [product, setProduct] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
@@ -15,27 +14,29 @@ const Product = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8082/api/product/${id}`
-        );
+        const response = await API.get(`/product/${id}`);
         setProduct(response.data);
 
         if (response.data.imageName && response.data.imageName !== null) {
           fetchImage();
         } else {
-          setImageUrl(""); // ensures fallback image is used
-      }
+          setImageUrl("");
+        }
       } catch (error) {
         console.error("Error fetching product:", error);
       }
     };
 
     const fetchImage = async () => {
-      const response = await axios.get(
-        `http://localhost:8082/api/product/${id}/image`,
-        { responseType: "blob" }
-      );
-      setImageUrl(URL.createObjectURL(response.data));
+      try {
+        const response = await API.get(
+          `/product/${id}/image`,
+          { responseType: "blob" }
+        );
+        setImageUrl(URL.createObjectURL(response.data));
+      } catch (error) {
+        console.error("Error fetching image:", error);
+      }
     };
 
     fetchProduct();
@@ -43,7 +44,7 @@ const Product = () => {
 
   const deleteProduct = async () => {
     try {
-      await axios.delete(`http://localhost:8082/api/product/${id}`);
+      await API.delete(`/product/${id}`);
       removeFromCart(id);
       console.log("Product deleted successfully");
       alert("Product deleted successfully");
@@ -72,16 +73,16 @@ const Product = () => {
   return (
     <>
       <div className="containers" style={{ display: "flex" }}>
-        <img
+      <img
           className="left-column-img"
-          src={
-            imageUrl
+        src={
+          imageUrl
             ? imageUrl
             : "https://via.placeholder.com/400x300?text=No+Image"
-          }
-          alt={product.imageName}
-          style={{ width: "50%", height: "auto" }}
-        />
+        }
+        alt={product.imageName}
+        style={{ width: "50%", height: "auto" }}
+      />
 
         <div className="right-column" style={{ width: "50%" }}>
           <div className="product-description">
@@ -98,23 +99,23 @@ const Product = () => {
             
            
             <h1 style={{ fontSize: "2rem", marginBottom: "0.5rem",textTransform: 'capitalize', letterSpacing:'1px' }}>
-              {product.name}
-            </h1>
+            {product.name}
+          </h1>
             <i style={{ marginBottom: "3rem" }}>{product.brand}</i>
             <p style={{fontWeight:'bold',fontSize:'1rem',margin:'10px 0px 0px'}}>PRODUCT DESCRIPTION :</p>
             <p style={{ marginBottom: "1rem" }}>{product.description}</p>
-          </div>
+        </div>
 
           <div className="product-price">
             <span style={{ fontSize: "2rem", fontWeight: "bold" }}>
               {"$" + product.price}
             </span>
-            <button
+          <button
               className={`cart-btn ${
                 !product.productAvailable ? "disabled-btn" : ""
               }`}
               onClick={handlAddToCart}
-              disabled={!product.productAvailable}
+            disabled={!product.productAvailable}
               style={{
                 padding: "1rem 2rem",
                 fontSize: "1rem",
@@ -125,17 +126,17 @@ const Product = () => {
                 cursor: "pointer",
                 marginBottom: "1rem",
               }}
-            >
-              {product.productAvailable ? "Add to cart" : "Out of Stock"}
-            </button>
+          >
+            {product.productAvailable ? "Add to cart" : "Out of Stock"}
+          </button>
             <h6 style={{ marginBottom: "1rem" }}>
               Stock Available :{" "}
               <i style={{ color: "green", fontWeight: "bold" }}>
-                {product.stockQuantity}
+              {product.stockQuantity}
               </i>
-            </h6>
+          </h6>
           
-          </div>
+        </div>
           <div className="update-button" style={{ display: "flex", gap: "1rem" }}>
             <button
               className="btn btn-primary"
@@ -151,8 +152,8 @@ const Product = () => {
                 cursor: "pointer",
               }}
             >
-              Update
-            </button>
+            Update
+          </button>
             {/* <UpdateProduct product={product} onUpdate={handleUpdate} /> */}
             <button
               className="btn btn-primary"
@@ -168,11 +169,11 @@ const Product = () => {
                 cursor: "pointer",
               }}
             >
-              Delete
-            </button>
-          </div>
+            Delete
+          </button>
         </div>
       </div>
+    </div>
     </>
   );
 };
